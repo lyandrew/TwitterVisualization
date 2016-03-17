@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>
+		Twitter Visualization
+		</title>
+		<style>
+			body {
+				background-image:url('outline.png');
+				background-repeat:no-repeat;
+				background-position: 0px -35px;
+			}
+			#Rounded_button, #Rounded_button2, #Rounded_button3, #Rounded_button4, #Rounded_button5,
+			#Rounded_button6, #Rounded_button7, #Rounded_button8, #Rounded_button9, #Rounded_button10,
+			#Rounded_button11, #Rounded_button12, #Rounded_button13, #Rounded_button14, #Rounded_button15,
+			#Rounded_button16, #Rounded_button17, #Rounded_button18, #Rounded_button19, #Rounded_button20,
+			#Rounded_button21, #Rounded_button22, #Rounded_button23, #Rounded_button24
+			{ height: 39px; width: 39px; border-radius: 50px; border: 1px solid #666; background:#BAAF07; font-size:9px; line-height: 35px; }
+	
+			#Rounded_button:hover, #Rounded_button2:hover, #Rounded_button3:hover, #Rounded_button4:hover, #Rounded_button5:hover,
+			#Rounded_button6:hover, #Rounded_button7:hover, #Rounded_button8:hover, #Rounded_button9:hover, #Rounded_button10:hover,
+			#Rounded_button11:hover, #Rounded_button12:hover, #Rounded_button13:hover, #Rounded_button14:hover, #Rounded_button15:hover,
+			#Rounded_button16:hover, #Rounded_button17:hover, #Rounded_button18:hover, #Rounded_button19:hover, #Rounded_button20:hover,
+			#Rounded_button21:hover, #Rounded_button22:hover, #Rounded_button23:hover, #Rounded_button24:hover
+			{border:4px double #bbb;color:#aaa;text-decoration:none;background:#e6e6e6}
+
+		</style>
+		<script type="text/javascript" src="http://www.google.com/jsapi"></script>
+		<script type="text/javascript">
+			google.load('visualization', '1.1', {packages: ['controls']});
+
+			var slider;
+			var slider_ats;
+			var steppedAreaChart;
+			var data;
+			var dashboard;
+			var stringFilter;
+
+			function drawVisualization() {
+				var query = new google.visualization.Query('https://docs.google.com/spreadsheet/pub?key=0Ap_Vc0-bB221dHJ6QzFFTi1DbnZRV2VTWV9QWVRBS0E&range=A1:AY75&pub=1');
+				query.send(handleQueryResponse);
+			}
+			
+			function handleQueryResponse(response) {
+	  
+				// Create our data table.
+				data = response.getDataTable();
+
+				// Define a slider control for the 'Donuts eaten' column
+				slider = new google.visualization.ControlWrapper({
+					'controlType': 'NumberRangeFilter',
+					'containerId': 'control',
+					'options': {
+						'filterColumnLabel': 'All Tweets',
+					}
+				});
+				slider_ats = new google.visualization.ControlWrapper({
+					'controlType': 'NumberRangeFilter',
+					'containerId': 'control2',
+					'options': {
+						'filterColumnLabel': 'All Tweets with @',
+					}
+				});
+			
+				stringFilter = new google.visualization.ControlWrapper({
+					'controlType': 'StringFilter',
+					'containerId': 'control3',
+					'options': {
+						'filterColumnLabel': 'User'
+					}
+				});     
+				
+				// Define a stepped area chart
+				steppedAreaChart = new google.visualization.ChartWrapper({
+					'chartType': 'SteppedAreaChart',
+					'containerId': 'chart',
+					'options': {
+						'backgroundColor': 'transparent',
+						'width': 520,
+						'height': 350,
+						'hAxis': { 
+							'title': 'Hour',
+							'titleTextStyle': {color: '#F8F8FF'},
+							'textStyle': {color: '#F8F8FF'}
+						},
+					'vAxis': { 
+						'title': 'Number of Tweets',
+						'titleTextStyle': {color: '#F8F8FF'},
+						'textStyle': {color: '#F8F8FF'}
+					},
+					'animation':{
+						'duration': 300,
+						'easing': 'out',
+					},
+					'legend':{
+						'textStyle': {color: '#F8F8FF'}
+					}
+					}
+				});
+	 
+				// Create the dashboard
+				dashboard = new google.visualization.Dashboard(document.getElementById('dashboard'));
+		  
+				// Register a listener to be notified once the dashboard is ready.
+				google.visualization.events.addListener(dashboard, 'ready', dashboardReady);
+				var view = new google.visualization.DataView(data);
+				view.setColumns([0, 1,2]);
+
+				// Configure the dashboard so that the slider to affect the steppedAreaChart,
+				// then draw the dashboard.
+				dashboard.bind(slider, slider_ats);
+				dashboard.bind(slider_ats, stringFilter);
+				dashboard.bind(stringFilter,steppedAreaChart);
+				dashboard.draw(view);
+			}
+		  
+		function dashboardReady() {
+			// The dashboard is ready to accept interaction. Configure the buttons to
+			// programmatically affect the dashboard when clicked.
+			 
+			// Change the slider selected range when clicked.
+			document.getElementById('rangeButton').onclick = function() {
+				var view = new google.visualization.DataView(data);
+				view.setColumns([0, 1, 2]);
+				slider.setOption('filterColumnLabel', data.getColumnLabel(1));
+				slider_ats.setOption('filterColumnLabel', data.getColumnLabel(2));
+				dashboard.draw(view);
+				writeMessage("Tweets from All Hours", data.getColumnLabel(1), data.getColumnLabel(2));
+			};
+			
+			document.getElementById('Rounded_button').onclick = function() {
+				document.getElementById('Rounded_button').focus();
+				var view = new google.visualization.DataView(data);
+				view.setColumns([0, 43,44]);
+				slider.setOption('filterColumnLabel', data.getColumnLabel(43));
+				slider_ats.setOption('filterColumnLabel', data.getColumnLabel(44));
+				dashboard.draw(view);
+				writeMessage("8:00-9:00 PM", data.getColumnLabel(43), data.getColumnLabel(44));
+			};
+			document.getElementById('Rounded_button2').onclick = function() {
+				document.getElementById('Rounded_button2').focus();
+				var view = new google.visualization.DataView(data);
+				view.setColumns([0, 45,46]);
+				slider.setOption('filterColumnLabel', data.getColumnLabel(45));
+				slider_ats.setOption('filterColumnLabel', data.getColumnLabel(46));
+				dashboard.draw(view);
+				writeMessage("9:00-10:00 PM", data.getColumnLabel(45), data.getColumnLabel(46));
+			};
+			document.getElementById('Rounded_button3').onclick = function() {
+				document.getElementById('Rounded_button3').focus();
+				var view = new google.visualization.DataView(data);
+				view.setColumns([0, 47,48]);
+				slider.setOption('filterColumnLabel', data.getColumnLabel(47));
+				slider_ats.setOption('filterColumnLabel', data.getColumnLabel(48));
+				dashboard.draw(view);
+				writeMessage( "10:00-11:00 PM", data.getColumnLabel(47), data.getColumnLabel(48));
+			};	
+			document.getElementById('Rounded_button4').onclick = function() {
+				document.getElementById('Rounded_button4').focus();
+				var view = new google.visualization.DataView(data);
+				view.setColumns([0, 49,50]);
+				slider.setOption('filterColumnLabel', data.getColumnLabel(49));
+				slider_ats.setOption('filterColumnLabel', data.getColumnLabel(50));
+				dashboard.draw(view);
+				writeMessage("11:00-12:00 AM", data.getColumnLabel(49), data.getColumnLabel(50));
+			};
+			document.getElementById('Rounded_button5').onclick = function() {
+				document.getElementById('Rounded_button5').focus();
+				var view = new google.visualization.DataView(data);
+				view.setColumns([0, 3,4]);
+				slider.setOption('filterColumnLabel', data.getColumnLabel(3));
+				slider_ats.setOption('filterColumnLabel', data.getColumnLabel(4));
+				dashboard.draw(view);
+				writeMessage("12:00-1:00 AM", data.getColumnLabel(3), data.getColumnLabel(4));
+			};	
+			document.getElementById('Rounded_button6').onclick = function() {
+				document.getElementById('Rounded_button6').focus();
+				var view = new google.visualization.DataView(data);
+				view.setColumns([0, 5,6]);
+				slider.setOption('filterColumnLabel', data.getColumnLabel(5));
+				slider_ats.setOption('filterColumnLabel', data.getColumnLabel(6));
+				dashboard.draw(view);
+				writeMessage("1:00-2:00 AM", data.getColumnLabel(5), data.getColumnLabel(6));
+			};
+			document.getElementById('Rounded_button7').onclick = function() {
+				document.getElementById('Rounded_button7').focus();
+				var view = new google.visualization.DataView(data);
+				view.setColumns([0, 7,8]);
+				slider.setOption('filterColumnLabel', data.getColumnLabel(7));
+				slider_ats.setOption('filterColumnLabel', data.getColumnLabel(8));
+				dashboard.draw(view);
+				writeMessage("2:00-3:00 AM", data.getColumnLabel(7), data.getColumnLabel(8));
+			};	
+				
+			document.getElementById('Rounded_button8').onclick = function() {
+				document.getElementById('Rounded_button8').focus();
+				var view = new google.visualization.DataView(data);
+				view.setColumns([0, 9,10]);
+				slider.setOption('filterColumnLabel', data.getColumnLabel(9));
+				slider_ats.setOption('filterColumnLabel', data.getColumnLabel(10));
+				dashboard.draw(view);
+				writeMessage("3:00-4:00 AM", data.getColumnLabel(9), data.getColumnLabel(10));
+			};
+			document.getElementById('Rounded_button9').onclick = function() {
+				document.getElementById('Rounded_button9').focus();
+				var view = new google.visualization.DataView(data);
+				view.setColumns([0, 11,12]);
+				slider.setOption('filterColumnLabel', data.getColumnLabel(11));
+				slider_ats.setOption('filterColumnLabel', data.getColumnLabel(12));
+				dashboard.draw(view);
+				writeMessage("4:00-5:00 AM", data.getColumnLabel(11), data.getColumnLabel(12));
+			};	
+				
+			document.getElementById('Rounded_button10').onclick = function() {
+				document.getElementById('Rounded_button10').focus();
+				var view = new google.visualization.DataView(data);
+				view.setColumns([0, 13,14]);
+				slider.setOption('filterColumnLabel', data.getColumnLabel(13));
+				slider_ats.setOption('filterColumnLabel', data.getColumnLabel(14));
+				dashboard.draw(view);
+				writeMessage("5:00-6:00 AM", data.getColumnLabel(13), data.getColumnLabel(14));
+			};
+			document.getElementById('Rounded_button11').onclick = function() {
+				document.getElementById('Rounded_button11').focus();
+				var view = new google.visualization.DataView(data);
+				view.setColumns([0, 15,16]);
+				slider.setOption('filterColumnLabel', data.getColumnLabel(15));
+				slider_ats.setOption('filterColumnLabel', data.getColumnLabel(16));
+				dashboard.draw(view);
+				writeMessage("6:00-7:00 AM", data.getColumnLabel(15), data.getColumnLabel(16));
+			};	
+				
+			document.getElementById('Rounded_button12').onclick = function() {
+				document.getElementById('Rounded_button12').focus();
+				var view = new google.visualization.DataView(data);
+				view.setColumns([0, 17,18]);
+				slider.setOption('filterColumnLabel', data.getColumnLabel(17));
+				slider_ats.setOption('filterColumnLabel', data.getColumnLabel(18));
+				dashboard.draw(view);
+				writeMessage("7:00-8:00 AM", data.getColumnLabel(17), data.getColumnLabel(18));
+			};
+			document.getElementById('Rounded_button13').onclick = function() {
+				document.getElementById('Rounded_button13').focus();
+				var view = new google.visualization.DataView(data);
+				view.setColumns([0, 19,20]);
+				slider.setOption('filterColumnLabel', data.getColumnLabel(19));
+				slider_ats.setOption('filterColumnLabel', data.getColumnLabel(20));
+				dashboard.draw(view);
+				writeMessage( "8:00-9:00 AM", data.getColumnLabel(19), data.getColumnLabel(20));
+			};	
+			document.getElementById('Rounded_button14').onclick = function() {
+				document.getElementById('Rounded_button14').focus();
+				var view = new google.visualization.DataView(data);
+				view.setColumns([0, 21,22]);
+				slider.setOption('filterColumnLabel', data.getColumnLabel(21));
+				slider_ats.setOption('filterColumnLabel', data.getColumnLabel(22));
+				dashboard.draw(view);
+				writeMessage("9:00-10:00 AM", data.getColumnLabel(21), data.getColumnLabel(22));
+			};
+			document.getElementById('Rounded_button15').onclick = function() {
+				document.getElementById('Rounded_button15').focus();
+				var view = new google.visualization.DataView(data);
+				view.setColumns([0, 23,24]);
+				slider.setOption('filterColumnLabel', data.getColumnLabel(23));
+				slider_ats.setOption('filterColumnLabel', data.getColumnLabel(24));
+				dashboard.draw(view);
+				writeMessage("10:00-11:00 AM", data.getColumnLabel(23), data.getColumnLabel(24));
+			};	
+				
+			document.getElementById('Rounded_button16').onclick = function() {
+				document.getElementById('Rounded_button16').focus();
+				var view = new google.visualization.DataView(data);
+				view.setColumns([0, 25,26]);
+				slider.setOption('filterColumnLabel', data.getColumnLabel(25));
+				slider_ats.setOption('filterColumnLabel', data.getColumnLabel(26));
+				dashboard.draw(view);
+				writeMessage("11:00-12:00 PM", data.getColumnLabel(25), data.getColumnLabel(26));
+			};
+			document.getElementById('Rounded_button17').onclick = function() {
+				document.getElementById('Rounded_button17').focus();
+				var view = new google.visualization.DataView(data);
+				view.setColumns([0, 27,28]);
+				slider.setOption('filterColumnLabel', data.getColumnLabel(27));
+				slider_ats.setOption('filterColumnLabel', data.getColumnLabel(28));
+				dashboard.draw(view);
+				writeMessage( "12:00-1:00 PM", data.getColumnLabel(27), data.getColumnLabel(28));
+			};	
+			document.getElementById('Rounded_button18').onclick = function() {
+				document.getElementById('Rounded_button18').focus();
+				var view = new google.visualization.DataView(data);
+				view.setColumns([0, 29,30]);
+				slider.setOption('filterColumnLabel', data.getColumnLabel(29));
+				slider_ats.setOption('filterColumnLabel', data.getColumnLabel(30));
+				dashboard.draw(view);
+				writeMessage( "1:00-2:00 PM", data.getColumnLabel(29), data.getColumnLabel(30));
+			};
+			document.getElementById('Rounded_button19').onclick = function() {
+				document.getElementById('Rounded_button19').focus();
+				var view = new google.visualization.DataView(data);
+				view.setColumns([0, 31,32]);
+				slider.setOption('filterColumnLabel', data.getColumnLabel(31));
+				slider_ats.setOption('filterColumnLabel', data.getColumnLabel(32));
+				dashboard.draw(view);
+				writeMessage("2:00-3:00 PM", data.getColumnLabel(31), data.getColumnLabel(32));
+			};	
+				
+			document.getElementById('Rounded_button20').onclick = function() {
+				document.getElementById('Rounded_button20').focus();
+				var view = new google.visualization.DataView(data);
+				view.setColumns([0, 33,34]);
+				slider.setOption('filterColumnLabel', data.getColumnLabel(33));
+				slider_ats.setOption('filterColumnLabel', data.getColumnLabel(34));
+				dashboard.draw(view);
+				writeMessage("3:00-4:00 PM", data.getColumnLabel(33), data.getColumnLabel(34));
+			};
+			document.getElementById('Rounded_button21').onclick = function() {
+				document.getElementById('Rounded_button21').focus();
+				var view = new google.visualization.DataView(data);
+				view.setColumns([0, 35,36]);
+				slider.setOption('filterColumnLabel', data.getColumnLabel(35));
+				slider_ats.setOption('filterColumnLabel', data.getColumnLabel(36));
+				dashboard.draw(view);
+				writeMessage( "4:00-5:00 PM", data.getColumnLabel(35), data.getColumnLabel(36));
+			};	
+				
+			document.getElementById('Rounded_button22').onclick = function() {
+				document.getElementById('Rounded_button22').focus();
+				var view = new google.visualization.DataView(data);
+				view.setColumns([0, 37,38]);
+				slider.setOption('filterColumnLabel', data.getColumnLabel(37));
+				slider_ats.setOption('filterColumnLabel', data.getColumnLabel(38));
+				dashboard.draw(view);
+				writeMessage("5:00-6:00 PM", data.getColumnLabel(37), data.getColumnLabel(38));
+			};
+			document.getElementById('Rounded_button23').onclick = function() {
+				document.getElementById('Rounded_button23').focus();
+				var view = new google.visualization.DataView(data);
+				view.setColumns([0, 39,40]);
+				slider.setOption('filterColumnLabel', data.getColumnLabel(39));
+				slider_ats.setOption('filterColumnLabel', data.getColumnLabel(40));
+				dashboard.draw(view);
+				writeMessage( "6:00-7:00 PM", data.getColumnLabel(39), data.getColumnLabel(40));
+			};	
+				
+			document.getElementById('Rounded_button24').onclick = function() {
+				document.getElementById('Rounded_button24').focus();
+				var view = new google.visualization.DataView(data);
+				view.setColumns([0, 41,42]);
+				slider.setOption('filterColumnLabel', data.getColumnLabel(41));
+				slider_ats.setOption('filterColumnLabel', data.getColumnLabel(42));
+				dashboard.draw(view);
+				writeMessage( "7:00-8:00 PM", data.getColumnLabel(41), data.getColumnLabel(42));
+			};
+		}
+		
+		function writeMessage(message, filter1_mess, filter2_mess) {
+			var canvas = document.getElementById('myCanvas');
+			var context = canvas.getContext('2d');
+			context.clearRect(0, 0, canvas.width, canvas.height);
+			context.font = '18pt Calibri';
+			context.fillStyle = 'white';
+			context.fillText(message, 10, 25);
+
+			var range1 = document.getElementById('rangeFilter1');
+			var range_button = range1.getContext('2d');
+			range_button.clearRect(0, 0, range1.width, range1.height);
+			range_button.font = '14pt Calibri';
+			range_button.fillStyle = 'white';
+			range_button.fillText(filter1_mess, 10, 25);
+					
+			var range2 = document.getElementById('rangeFilter2');
+			var range_button2 = range2.getContext('2d');
+			range_button2.clearRect(0, 0, range2.width, range2.height);
+			range_button2.font = '14pt Calibri';
+			range_button2.fillStyle = 'white';
+			range_button2.fillText(filter2_mess, 10, 25);
+			
+			var range3 = document.getElementById('rangeFilter3');
+			var range_button3 = range3.getContext('2d');
+			range_button3.clearRect(0, 0, range3.width, range3.height);
+			range_button3.font = '11pt Calibri';
+			range_button3.fillStyle = 'white';
+			range_button3.fillText("User", 10, 25);
+		}      	
+
+		google.setOnLoadCallback(drawVisualization);
+
+		</script>
+	</head>
+	<body style="font-family: Calibri; border: 0 none; background-color:black;">
+		<div id="dashboard">
+			<table>
+				<tr style='vertical-align: top'>
+					<td style='width: 600px; position: relative; left: 80px; top: 150px'>
+						<div style="float: left;" id="chart"></div>
+					</td>
+					<td style='width: 270px; font-size: 0.9em;'>
+						<div id="control" style='background-color:black;'></div>   <br />   
+						<div id="control2" style='background-color:black;'></div> <br />     
+						<div id="control3" style='background-color:black;'></div>  
+					 
+						<div id="buttons" style='width: 270px;'>
+							<button style="margin: 2em" id="rangeButton">Everything (Tweets from every hour)</button><br /> 
+						</div>
+					</td>
+				</tr>
+			</table>
+		</div>
+		
+		<canvas id="myCanvas" width="170" height="60" style='position: absolute; left: 280px; top: 158px'></canvas>
+		<canvas id="rangeFilter1" width="170" height="30" style='position: absolute; left: 617px; top: 0px'></canvas>
+		<canvas id="rangeFilter2" width="170" height="30" style='position: absolute; left: 617px; top: 55px'></canvas>
+		<canvas id="rangeFilter3" width="40" height="30" style='position: absolute; left: 605px; top: 117px'></canvas>
+		
+		<script>
+			writeMessage("Tweets from All", "All Tweets", "All Tweets with @");
+		</script>
+		<div id="Rounded_button" style='position: absolute; left: 89px; top: 158px; text-align: center;font-weight: bold '> 8-9PM </div>
+		<div id="Rounded_button2" style='position: absolute; left: 134px; top: 101px;text-align: center;font-weight: bold'> 9-10PM </div>
+		<div id="Rounded_button3" style='position: absolute; left: 192px; top: 56px; text-align: center;font-weight: bold'> 10-11PM </div>
+		<div id="Rounded_button4" style='position: absolute; left: 260px; top: 28px; text-align: center;font-weight: bold'> 11-12PM </div>
+		<div id="Rounded_button5" style='position: absolute; left: 333px; top: 19px;text-align: center;font-weight: bold'> 12-1AM </div>
+		<div id="Rounded_button6" style='position: absolute; left: 406px; top: 29px;text-align: center;font-weight: bold'> 1-2AM </div>
+		<div id="Rounded_button7" style='position: absolute; left: 474px; top: 58px; text-align: center;font-weight: bold'> 2-3AM </div>
+		<div id="Rounded_button8" style='position: absolute; left: 531px; top: 103px; text-align: center;font-weight: bold'> 3-4AM </div>
+		<div id="Rounded_button9" style='position: absolute; left: 576px; top: 161px;text-align: center;font-weight: bold'> 4-5AM </div>
+		<div id="Rounded_button10" style='position: absolute; left: 603px; top: 229px; text-align: center;font-weight: bold'> 5-6AM </div>
+		<div id="Rounded_button11" style='position: absolute; left: 612px; top: 302px; text-align: center;font-weight: bold'> 6-7AM </div>
+		<div id="Rounded_button12" style='position: absolute; left: 601px; top: 375px; text-align: center;font-weight: bold'> 7-8AM </div>
+		<div id="Rounded_button13" style='position: absolute; left: 572px; top: 442px; text-align: center;font-weight: bold'> 8-9AM </div>
+		<div id="Rounded_button14" style='position: absolute; left: 527px; top: 500px; text-align: center;font-weight: bold'> 9-10AM </div>
+		<div id="Rounded_button15" style='position: absolute; left: 469px; top: 544px; text-align: center;font-weight: bold'> 10-11AM </div>
+		<div id="Rounded_button16" style='position: absolute; left: 400px; top: 571px; text-align: center;font-weight: bold'> 11-12PM </div>
+		<div id="Rounded_button17" style='position: absolute; left: 332px; top: 580px; text-align: center;font-weight: bold'> 12-1PM </div>
+		<div id="Rounded_button18" style='position: absolute; left: 259px; top: 570px; text-align: center;font-weight: bold'> 1-2PM </div>
+		<div id="Rounded_button19" style='position: absolute; left: 191px; top: 542px; text-align: center;font-weight: bold'> 2-3PM </div>
+		<div id="Rounded_button20" style='position: absolute; left: 133px; top: 498px; text-align: center;font-weight: bold'> 3-4PM </div>
+		<div id="Rounded_button21" style='position: absolute; left: 88px; top: 439px; text-align: center;font-weight: bold'> 4-5PM </div>
+		<div id="Rounded_button22" style='position: absolute; left: 60px; top: 371px; text-align: center;font-weight: bold'> 5-6PM </div>
+		<div id="Rounded_button23" style='position: absolute; left: 51px; top: 298px; text-align: center;font-weight: bold'> 6-7PM </div>
+		<div id="Rounded_button24" style='position: absolute; left: 61px; top: 226px; text-align: center;font-weight: bold'> 7-8PM </div> 
+	</body>
+</html>
